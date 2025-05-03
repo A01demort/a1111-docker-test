@@ -19,15 +19,17 @@ declare -A EXTENSIONS=(
   [controlnet]="https://github.com/Mikubill/sd-webui-controlnet.git"
 )
 
-# 초기 확장 설치
+# ✅ 확장 기능 설치
 if [ ! -d "$EXT_DIR/adetailer" ]; then
-    echo "🧱 WebUI 초기 확장 및 리포지토리 설치 중..."
+    echo "🧱 WebUI 확장 및 리포지토리 설치 중..."
 
     mkdir -p "$WEBUI_DIR/models/Stable-diffusion"
 
+    # 필수 리포지토리
     git clone https://github.com/Stability-AI/generative-models.git "$REPO_DIR/generative-models"
     pip install -e "$REPO_DIR/generative-models"
 
+    # static asset
     git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui-assets "$ASSET_DIR"
 
     for name in "${!EXTENSIONS[@]}"; do
@@ -42,27 +44,30 @@ if [ ! -d "$EXT_DIR/adetailer" ]; then
     cd "$WEBUI_DIR"
     pip install -r requirements.txt
 
-    echo "✅ 확장 및 리포지토리 설치 완료"
+    echo "✅ 확장 설치 완료"
 fi
 
-# 사용자 패키지 자동 재설치
+# ✅ 사용자 패키지 자동 설치
 if [ -f "$USER_REQUIREMENTS" ]; then
     echo "🔍 사용자 패키지 재설치 중..."
     pip install --no-cache-dir -r "$USER_REQUIREMENTS"
 fi
 
-# 현재 패키지 목록
+# ✅ pip freeze 상태 추적
 pip freeze > /workspace/.current_installed.txt
-
-# 기존과 다르면 저장
 if ! cmp -s /workspace/.current_installed.txt "$LAST_FREEZE"; then
-    echo "📝 패키지 변경 감지됨 — requirements-user.txt 자동 갱신"
     cp /workspace/.current_installed.txt "$USER_REQUIREMENTS"
     cp /workspace/.current_installed.txt "$LAST_FREEZE"
-else
-    echo "✅ 사용자 패키지 변경 없음"
 fi
 
-# WebUI 실행
+# ✅ PYTHONPATH에 확장 scripts 경로 등록 (중요!!)
+export PYTHONPATH=$PYTHONPATH:\
+$EXT_DIR/sd-webui-controlnet/scripts:\
+$EXT_DIR/sd-webui-segment-anything/scripts:\
+$EXT_DIR/a1111-sd-webui-tagcomplete/scripts
+
+echo "🔧 PYTHONPATH 등록 완료"
+
+# ✅ WebUI 실행
 cd "$WEBUI_DIR"
-python launch.py --xformers --listen --port 7860 --enable-insecure-extension-access
+python launch.py --xformers --listen --enable-insecure-extension-access
