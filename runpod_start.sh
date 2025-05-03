@@ -3,6 +3,7 @@
 WEBUI_DIR="/workspace/stable-diffusion-webui"
 EXT_DIR="$WEBUI_DIR/extensions"
 REPO_DIR="$WEBUI_DIR/repositories"
+GEN_REPO_DST="$REPO_DIR/generative-models-lib"
 ASSET_DIR="$REPO_DIR/stable-diffusion-webui-assets"
 USER_REQUIREMENTS="/workspace/requirements-user.txt"
 LAST_FREEZE="/workspace/.last_installed.txt"
@@ -19,29 +20,26 @@ declare -A EXTENSIONS=(
   [controlnet]="https://github.com/Mikubill/sd-webui-controlnet.git"
 )
 
-echo "🧹 [INIT] 캐시 및 환경 초기화 시작..."
-
-# 🔄 캐시/컴파일된 파이썬 파일 삭제 (restart 꼬임 방지)
-find "$WEBUI_DIR" -type d -name "__pycache__" -exec rm -rf {} +
-find "$WEBUI_DIR" -name "*.pyc" -delete
+echo "🧹 캐시 및 환경 초기화 중..."
+find "$WEBUI_DIR" -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null
+find "$WEBUI_DIR" -name "*.pyc" -delete 2>/dev/null
 rm -rf ~/.nv 2>/dev/null || true
 
-# 🔄 PYTHONPATH 재설정 (확장 기능 import 문제 해결)
-export PYTHONPATH=$PYTHONPATH:\
-$EXT_DIR/sd-webui-controlnet/scripts:\
-$EXT_DIR/sd-webui-segment-anything/scripts:\
-$EXT_DIR/a1111-sd-webui-tagcomplete/scripts
+# ✅ WebUI 클론
+if [ ! -d "$WEBUI_DIR/.git" ]; then
+    echo "📥 WebUI 클론 중..."
+    git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git "$WEBUI_DIR"
+fi
 
-echo "✅ 캐시 제거 및 PYTHONPATH 설정 완료"
-
-# 📦 확장 기능 자동 설치
+# ✅ 확장 및 리포지토리 설치 (최초 1회)
 if [ ! -d "$EXT_DIR/adetailer" ]; then
-    echo "📦 확장 기능 및 리포지토리 설치 시작..."
-
+    echo "📦 확장 및 리포지토리 설치 시작..."
     mkdir -p "$WEBUI_DIR/models/Stable-diffusion"
 
-    git clone https://github.com/Stability-AI/generative-models.git "$REPO_DIR/generative-models"
-    pip install -e "$REPO_DIR/generative-models"
+    if [ ! -d "$GEN_REPO_DST" ]; then
+        git clone https://github.com/Stability-AI/generative-models.git "$GEN_REPO_DST"
+        pip install -e "$GEN_REPO_DST"
+    fi
 
     git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui-assets "$ASSET_DIR"
 
@@ -51,23 +49,33 @@ if [ ! -d "$EXT_DIR/adetailer" ]; then
         if [ ! -d "$dst" ]; then
             echo "🔗 [$name] 설치 중..."
             git clone "$repo" "$dst"
-        else
-            echo "✅ [$name] 이미 설치됨"
         fi
     done
 
-    cd "$WEBUI_DIR"
-    pip install -r requirements.txt
-    echo "✅ 확장 및 리포지토리 설치 완료"
+    echo "✅ 확장 설치 완료"
 fi
 
-# 📄 사용자 의존성 복구
+# ✅ WebUI requirements.txt 설치
+cd "$WEBUI_DIR"
+if [ -f "requirements.txt" ]; then
+    echo "📦 requirements.txt 설치 중..."
+    pip install -r requirements.txt || echo "⚠️ requirements.txt 설치 실패"
+else
+    echo "❌ requirements.txt가 없음!"
+fi
+
+# ✅ gradio 강제 설치 + 검증
+echo "📦 gradio 설치 중..."
+pip install gradio==4.14.0 || echo "⚠️ gradio 설치 실패"
+python -c "import gradio; print('✅ gradio 설치 확인:', gradio.__version__)" || { echo "❌ gradio import 실패"; exit 1; }
+
+# ✅ 사용자 패키지 설치
 if [ -f "$USER_REQUIREMENTS" ]; then
     echo "📥 사용자 패키지 설치 중 (--no-deps)"
     pip install --no-deps -r "$USER_REQUIREMENTS"
 fi
 
-# 🔄 pip 상태 추적
+# ✅ 패키지 상태 저장
 pip freeze > /workspace/.current_installed.txt
 if ! cmp -s /workspace/.current_installed.txt "$LAST_FREEZE"; then
     cp /workspace/.current_installed.txt "$USER_REQUIREMENTS"
@@ -75,11 +83,21 @@ if ! cmp -s /workspace/.current_installed.txt "$LAST_FREEZE"; then
     echo "💾 requirements-user.txt 갱신됨"
 fi
 
-# 📂 설치된 확장 목록 출력 (확인용)
-echo "📂 현재 설치된 확장 목록:"
+# ✅ PYTHONPATH 설정 (controlnet/scripts 제외)
+PY_SCRIPTS_PATHS=""
+for ext in "$EXT_DIR"/*; do
+    extname=$(basename "$ext")
+    if [ "$extname" != "controlnet" ] && [ -d "$ext/scripts" ]; then
+        PY_SCRIPTS_PATHS="$PY_SCRIPTS_PATHS:$ext/scripts"
+    fi
+done
+export PYTHONPATH="$PYTHONPATH$PY_SCRIPTS_PATHS"
+echo "✅ PYTHONPATH 설정됨: $PY_SCRIPTS_PATHS"
+
+# ✅ 확장 목록 출력
+echo "📂 설치된 확장:"
 ls -1 "$EXT_DIR"
 
-# 🚀 WebUI 실행
-cd "$WEBUI_DIR"
+# ✅ WebUI 실행
 echo "🚀 WebUI 실행 시작"
 python launch.py --xformers --listen --enable-insecure-extension-access
