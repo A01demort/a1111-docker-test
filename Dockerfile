@@ -36,7 +36,7 @@ RUN apt-get remove -y nodejs npm && \
 WORKDIR /workspace
 RUN mkdir -p /workspace && chmod -R 777 /workspace && chown -R root:root /workspace
 
-# Python 필수 패키지 설치
+# Python 패키지 설치
 RUN pip install --upgrade pip && \
     pip install torch==2.1.1 torchvision==0.16.1 torchaudio==2.1.1 --index-url https://download.pytorch.org/whl/cu121 && \
     pip install xformers==0.0.22.post7 --extra-index-url https://download.pytorch.org/whl/cu121 && \
@@ -53,15 +53,18 @@ c.NotebookApp.password = ''\n\
 c.NotebookApp.terminado_settings = {'shell_command': ['/bin/bash']}" \
 > /root/.jupyter/jupyter_notebook_config.py
 
+# WebUI 리포지토리만 빌드에 포함
+RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git /workspace/stable-diffusion-webui
+
+# 런타임 설치 스크립트 복사
+COPY runpod_start.sh /workspace/runpod_start.sh
+RUN chmod +x /workspace/runpod_start.sh
+
 # 포트 오픈
 EXPOSE 7860
 EXPOSE 8888
 
-# runpod_start.sh 복사 (런타임 설치/실행 스크립트)
-COPY runpod_start.sh /workspace/runpod_start.sh
-RUN chmod +x /workspace/runpod_start.sh
-
-# WebUI + JupyterLab 병렬 실행
+# 병렬 실행: Jupyter + WebUI 런타임 설치 및 실행
 CMD bash -c "\
 jupyter lab --ip=0.0.0.0 --port=8888 --allow-root \
 --ServerApp.token='' --ServerApp.password='' & \
