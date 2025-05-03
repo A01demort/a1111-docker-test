@@ -1,33 +1,36 @@
 #!/bin/bash
 
 WEBUI_DIR="/workspace/stable-diffusion-webui"
-INSTALL_FLAG="$WEBUI_DIR/launch.py"
+EXT_DIR="$WEBUI_DIR/extensions/adetailer"
+GEN_DIR="$WEBUI_DIR/repositories/generative-models"
+ASSET_DIR="$WEBUI_DIR/repositories/stable-diffusion-webui-assets"
 
-# WebUI 디렉토리가 존재하지 않으면 설치
-if [ ! -f "$INSTALL_FLAG" ]; then
-    echo "🧱 WebUI 최초 설치 중..."
+# 최초 설치만 수행
+if [ ! -d "$EXT_DIR" ]; then
+    echo "🧱 WebUI 초기 확장 및 모델 설치 시작..."
 
-    # WebUI 설치
-    git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git "$WEBUI_DIR"
+    # 모델 디렉토리 생성
     mkdir -p "$WEBUI_DIR/models/Stable-diffusion"
 
-    # 기본 확장 및 리포지토리 설치
-    git clone https://github.com/Bing-su/adetailer.git "$WEBUI_DIR/extensions/adetailer"
-    git clone https://github.com/Stability-AI/generative-models.git "$WEBUI_DIR/repositories/generative-models"
-    pip install -e "$WEBUI_DIR/repositories/generative-models"
+    # ADetailer 확장
+    git clone https://github.com/Bing-su/adetailer.git "$EXT_DIR"
+
+    # generative-models
+    git clone https://github.com/Stability-AI/generative-models.git "$GEN_DIR"
+    pip install -e "$GEN_DIR"
 
     # static 리소스
-    git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui-assets "$WEBUI_DIR/repositories/stable-diffusion-webui-assets"
+    git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui-assets "$ASSET_DIR"
 
-    # Python requirements
+    # WebUI requirements 설치 (한 번만)
     cd "$WEBUI_DIR"
     pip install -r requirements.txt
 
-    echo "✅ 최초 설치 완료"
+    echo "✅ 확장 및 리포지토리 설치 완료"
 else
-    echo "📂 WebUI 디렉토리 이미 존재 — 추가 확장 포함 모두 생존 유지됨"
+    echo "📂 WebUI 확장 및 리포지토리 이미 존재 — 유지된 상태로 실행합니다"
 fi
 
-# 실행
+# WebUI 실행
 cd "$WEBUI_DIR"
 python launch.py --xformers --listen --port 7860 --enable-insecure-extension-access
