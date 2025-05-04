@@ -55,6 +55,16 @@ if [ ! -d "$EXT_DIR/adetailer" ]; then
     echo "✅ 확장 설치 완료"
 fi
 
+# ✅ ⚠️ 문제 있는 확장 강제 재설치
+for ext in segment-anything tagcomplete; do
+    echo "♻️ [$ext] 재설치 중 (버그 해결 목적)"
+    rm -rf "$EXT_DIR/$ext"
+    git clone "${EXTENSIONS[$ext]}" "$EXT_DIR/$ext" || {
+        echo "❌ $ext 재설치 실패"
+        exit 1
+    }
+done
+
 # ✅ WebUI requirements.txt 설치
 cd "$WEBUI_DIR"
 if [ -f "requirements.txt" ]; then
