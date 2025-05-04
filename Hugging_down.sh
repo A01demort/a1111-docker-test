@@ -80,6 +80,20 @@ downloads=(
 
   # Embedding
   "https://huggingface.co/datasets/gsdf/EasyNegative/resolve/main/EasyNegative.safetensors|/workspace/stable-diffusion-webui/embeddings/EasyNegative.safetensors"
+
+# checkpoint 모델
+"https://huggingface.co/zbmacro/Realistic-Vision-V6.0-B1/resolve/212352eaaef9d25edddd4f157f9fd340f3d216d8/realisticVisionV60B1_v60B1VAE.safetensors|/workspace/stable-diffusion-webui/models/Stable-diffusion/realisticVisionV60B1_v60B1VAE.safetensors"
+"https://huggingface.co/minaiosu/7whitefire7/resolve/7953a9d614d4919e8c59ebf2b7aaa3c614e95b30/realcartoon3d_v18.safetensors|/workspace/stable-diffusion-webui/models/Stable-diffusion/realcartoon3d_v18.safetensors"
+"https://huggingface.co/aasda111/SD_model_upload/resolve/c4603de3a1518b90d8a896c58f40d50e74c1808c/majicMIX%20realistic%20%E9%BA%A6%E6%A9%98%E5%86%99%E5%AE%9E_v7.safetensors|/workspace/stable-diffusion-webui/models/Stable-diffusion/majicMIX_realistic_v7.safetensors"
+"https://huggingface.co/jzli/DreamShaper-8/resolve/main/dreamshaper_8.safetensors|/workspace/stable-diffusion-webui/models/Stable-diffusion/dreamshaper_8.safetensors"
+"https://huggingface.co/Yntec/RevAnimatedV2Rebirth/resolve/main/revAnimated_v2RebirthVAE.safetensors|/workspace/stable-diffusion-webui/models/Stable-diffusion/revAnimated_v2RebirthVAE.safetensors"
+"https://huggingface.co/bolinzer/CetusMix_WhaleFall2/resolve/main/cetusMix_Whalefall2.safetensors|/workspace/stable-diffusion-webui/models/Stable-diffusion/cetusMix_Whalefall2.safetensors"
+"https://huggingface.co/bolinzer/ToonYou_Bata6/resolve/main/toonyou_beta6.safetensors|/workspace/stable-diffusion-webui/models/Stable-diffusion/toonyou_beta6.safetensors"
+"https://huggingface.co/digiplay/GhostMix/resolve/main/ghostmix_v20Bakedvae.safetensors|/workspace/stable-diffusion-webui/models/Stable-diffusion/ghostmix_v20Bakedvae.safetensors"
+"https://huggingface.co/cagliostrolab/animagine-xl-3.1/resolve/main/animagine-xl-3.1.safetensors|/workspace/stable-diffusion-webui/models/Stable-diffusion/animagine-xl-3.1.safetensors"
+"https://huggingface.co/wanrkim/JANKU_v3.0/resolve/main/JANKUV30NoobaiEPSRouwei_v30.safetensors|/workspace/stable-diffusion-webui/models/Stable-diffusion/JANKUV30NoobaiEPSRouwei_v30.safetensors"
+
+
 )
 
 # ====================================
