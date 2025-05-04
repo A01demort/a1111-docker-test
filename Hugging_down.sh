@@ -92,6 +92,10 @@ downloads=(
 "https://huggingface.co/digiplay/GhostMix/resolve/main/ghostmix_v20Bakedvae.safetensors|/workspace/stable-diffusion-webui/models/Stable-diffusion/ghostmix_v20Bakedvae.safetensors"
 "https://huggingface.co/cagliostrolab/animagine-xl-3.1/resolve/main/animagine-xl-3.1.safetensors|/workspace/stable-diffusion-webui/models/Stable-diffusion/animagine-xl-3.1.safetensors"
 "https://huggingface.co/wanrkim/JANKU_v3.0/resolve/main/JANKUV30NoobaiEPSRouwei_v30.safetensors|/workspace/stable-diffusion-webui/models/Stable-diffusion/JANKUV30NoobaiEPSRouwei_v30.safetensors"
+    
+# lora 모델
+"https://huggingface.co/OedoSoldier/detail-tweaker-lora/resolve/main/add_detail.safetensors|/workspace/stable-diffusion-webui/models/Lora/add_detail.safetensors"
+"https://huggingface.co/bolinzer/ghiblilora-sd1.5/resolve/main/ghibli_style_offset.safetensors|/workspace/stable-diffusion-webui/models/Lora/ghibli_style_offset.safetensors"
 
 
 )
