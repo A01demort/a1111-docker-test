@@ -56,7 +56,9 @@ c.NotebookApp.terminado_settings = {'shell_command': ['/bin/bash']}" \
 # WebUI 리포지토리만 빌드에 포함
 RUN git clone https://github.com/AUTOMATIC1111/stable-diffusion-webui.git /workspace/stable-diffusion-webui
 
+# hugging_down.sh 파일 및 설치 스크립트 복사
 # 런타임 설치 스크립트 복사
+COPY Hugging_down.sh /workspace/Hugging_down.sh
 COPY runpod_start.sh /workspace/runpod_start.sh
 RUN chmod +x /workspace/runpod_start.sh
 
