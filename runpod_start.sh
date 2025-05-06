@@ -62,8 +62,7 @@ if ! cmp -s /workspace/.current_installed.txt "$LAST_FREEZE"; then
 else
     echo "✅ 사용자 패키지 변경 없음"
 fi
-
-# 🔌 ReActor SFW 확장 설치 및 버그 패치
+# 🔌 ReActor SFW 확장 설치 및 NSFW 필터 제거 자동화
 REACTOR_NAME="sd-webui-reactor-sfw"
 REACTOR_URL="https://github.com/Gourieff/sd-webui-reactor-sfw.git"
 REACTOR_PATH="$EXT_DIR/$REACTOR_NAME"
@@ -73,14 +72,38 @@ if [ ! -d "$REACTOR_PATH" ]; then
     git clone "$REACTOR_URL" "$REACTOR_PATH"
 fi
 
+# 🔧 reactor_sfw.py 통째로 대체 (항상 True 리턴)
 PATCH_FILE="$REACTOR_PATH/scripts/reactor_sfw.py"
-if [ -f "$PATCH_FILE" ] && grep -q "def nsfw_image" "$PATCH_FILE"; then
-    echo "🩹 ReActor NSFW 필터 버그 핫픽스 적용 중..."
-    sed -i '/def nsfw_image/i\
-import torch' "$PATCH_FILE"
-    sed -i '/def nsfw_image/a\
-    if torch.cuda.is_available():\n        img = img.to("cuda")' "$PATCH_FILE"
-    echo "✅ 핫픽스 완료"
+if [ -f "$PATCH_FILE" ]; then
+    echo "🩹 reactor_sfw.py NSFW 판별 함수 무력화 중..."
+    cat > "$PATCH_FILE" <<'EOF'
+# NSFW 필터 제거됨 - 항상 통과 처리
+def nsfw_image(img, model_path):
+    return True
+EOF
+    echo "✅ reactor_sfw.py 패치 완료"
+fi
+# 🔧 reactor_swapper.py의 NSFW 함수만 안전하게 패치
+SWAPPER_FILE="$REACTOR_PATH/scripts/reactor_swapper.py"
+if [ -f "$SWAPPER_FILE" ]; then
+    echo "🔧 reactor_swapper.py NSFW 필터 안전하게 비활성화 중..."
+
+    sed -i '/def check_sfw_image/,/^$/c\
+def check_sfw_image(tmp_img):\
+    return tmp_img\n' "$SWAPPER_FILE"
+
+    sed -i '/def nsfw_image/,/^$/c\
+def nsfw_image(img, model_path):\
+    return True\n' "$REACTOR_PATH/scripts/reactor_sfw.py"
+
+    echo "✅ NSFW 필터 비활성화 완료"
+fi
+
+
+# ✅ insightface 설치 (ReActor 설치 및 패치 이후, WebUI 실행 직전)
+if [ -d "$REACTOR_PATH" ]; then
+    echo "🧪 insightface==0.7.3 설치 중..."
+    pip install insightface==0.7.3
 fi
 
 # WebUI 실행
