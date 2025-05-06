@@ -83,36 +83,20 @@ def nsfw_image(img, model_path):
 EOF
     echo "✅ reactor_sfw.py 패치 완료"
 fi
-
-# 🔧 reactor_swapper.py 안정적 재작성
+# 🔧 reactor_swapper.py의 NSFW 함수만 안전하게 패치
 SWAPPER_FILE="$REACTOR_PATH/scripts/reactor_swapper.py"
 if [ -f "$SWAPPER_FILE" ]; then
-    echo "🔁 reactor_swapper.py 전체 코드 안전 재작성 중..."
+    echo "🔧 reactor_swapper.py NSFW 필터 안전하게 비활성화 중..."
 
-    cat > "$SWAPPER_FILE" <<'EOF'
-from PIL import Image
+    sed -i '/def check_sfw_image/,/^$/c\
+def check_sfw_image(tmp_img):\
+    return tmp_img\n' "$SWAPPER_FILE"
 
-def check_sfw_image(tmp_img):
-    # NSFW 필터 제거됨 - 항상 통과 처리
-    return tmp_img
+    sed -i '/def nsfw_image/,/^$/c\
+def nsfw_image(img, model_path):\
+    return True\n' "$REACTOR_PATH/scripts/reactor_sfw.py"
 
-def blend_faces(*args, **kwargs):
-    pass
-
-def swap_face(*args, **kwargs):
-    pass
-
-class EnhancementOptions:
-    pass
-
-class DetectionOptions:
-    pass
-
-def build_face_model(*args, **kwargs):
-    pass
-EOF
-
-    echo "✅ reactor_swapper.py 전체 안전 재작성 완료"
+    echo "✅ NSFW 필터 비활성화 완료"
 fi
 
 
