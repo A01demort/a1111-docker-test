@@ -17,6 +17,7 @@ declare -A EXTENSIONS=(
   [segment-anything]="https://github.com/continue-revolution/sd-webui-segment-anything.git"
   [civitai-helper]="https://github.com/zixaphir/Stable-Diffusion-Webui-Civitai-Helper.git"
   [controlnet]="https://github.com/Mikubill/sd-webui-controlnet.git"
+  [wd14-tagger]="https://github.com/picobyte/stable-diffusion-webui-wd14-tagger.git"
 )
 
 # 초기 확장 설치
